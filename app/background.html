@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://static.freshdev.io/fdk/2.0/assets/fresh_client.js"></script>
+  </head>
+  <body>
+    <script>
+      // create a localStorage field recent_tickets if it doesn't exists
+      if (!localStorage.getItem("recent_tickets")) {
+        localStorage.setItem("recent_tickets", "[]");
+      }
+
+      app.initialized().then((client) => {
+        client.data.get("ticket").then((data) => {
+          var ticket_to_be_saved = {
+            id: data.ticket.id,
+            subject: data.ticket.subject,
+            last_viewed_at: new Date().getTime(),
+          };
+          // get recent_tickets from localStorage into an array
+          var recent_tickets = JSON.parse(localStorage.getItem("recent_tickets"));
+          var ticket_found = false;
+          for (var i = 0; i < recent_tickets.length; i++) {
+            if (recent_tickets[i].id == ticket_to_be_saved.id) {
+              recent_tickets[i] = ticket_to_be_saved;
+              ticket_found = true;
+              break;
+            }
+          }
+          if (!ticket_found) {
+            recent_tickets.push(ticket_to_be_saved);
+          }
+          // order recent_ticket by last_viewed_at
+          recent_tickets.sort(function (a, b) {
+            return b.last_viewed_at - a.last_viewed_at;
+          });
+          localStorage.setItem("recent_tickets", JSON.stringify(recent_tickets));
+        });
+      });
+    </script>
+  </body>
+</html>
